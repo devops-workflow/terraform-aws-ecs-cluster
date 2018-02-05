@@ -1,23 +1,61 @@
-data "aws_ami" "ecs_ami" {
-  most_recent = true
+###
+### Terraform AWS ECS Cluster
+###
 
-  filter {
+# Documentation references:
+
+module "enabled" {
+  source  = "devops-workflow/boolean/local"
+  version = "0.1.1"
+  value   = "${var.enabled}"
+}
+
+# Define composite variables for resources
+module "label" {
+  source        = "devops-workflow/label/local"
+  version       = "0.1.3"
+  organization  = "${var.organization}"
+  name          = "${var.name}"
+  namespace-env = "${var.namespace-env}"
+  namespace-org = "${var.namespace-org}"
+  environment   = "${var.environment}"
+  delimiter     = "${var.delimiter}"
+  attributes    = "${var.attributes}"
+  tags          = "${var.tags}"
+}
+
+# Lookup ECS optimised Amazon AMI in the selected region
+data "aws_ami" "aws_optimized_ecs" {
+  #count     = "${module.enabled.value}"
+  #count       = "${var.lookup_latest_ami ? 1 : 0}"
+  most_recent = true
+  owners = ["amazon"]
+  /*filter {
     name   = "owner-alias"
     values = ["amazon"]
-  }
-
+  }*/
   filter {
     name   = "name"
     values = ["amzn-ami-${var.ami_version}-amazon-ecs-optimized"]
   }
+  /*filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }*/
 }
 
 data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/user_data.tpl")}"
-
+  # TODO: option to pass in
+  # Cannot disable due to reference
+  #count     = "${module.enabled.value}"
+  template  = "${file("${path.module}/templates/user_data.tpl")}"
   vars {
     additional_user_data_script = "${var.additional_user_data_script}"
-    cluster_name                = "${aws_ecs_cluster.cluster.name}"
+    cluster_name                = "${aws_ecs_cluster.this.name}"
     docker_storage_size         = "${var.docker_storage_size}"
     dockerhub_token             = "${var.dockerhub_token}"
     dockerhub_email             = "${var.dockerhub_email}"
@@ -25,86 +63,58 @@ data "template_file" "user_data" {
 }
 
 data "aws_vpc" "vpc" {
-  id = "${var.vpc_id}"
+  #count = "${module.enabled.value}"
+  id    = "${var.vpc_id}"
 }
 
-resource "aws_launch_configuration" "ecs" {
-  name_prefix                 = "${coalesce(var.name_prefix, "ecs-${var.name}-")}"
-  image_id                    = "${var.ami == "" ? format("%s", data.aws_ami.ecs_ami.id) : var.ami}"   # Workaround until 0.9.6
+###
+### AWS ECS Cluster
+###
+resource "aws_ecs_cluster" "this" {
+  #count = "${module.enabled.value}"
+  name  = "${module.label.id}"
+}
+
+module "asg" {
+  #source    = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git?ref=tags/v0.1.3"
+  source      = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git"
+  enabled     = "${module.enabled.value}"
+  name        = "${module.label.name}"
+  environment = "${module.label.environment}"
+  // Launch configuration
+  associate_public_ip_address = "${var.associate_public_ip_address}"
+  iam_instance_profile        = "${aws_iam_instance_profile.ecs_profile.name}"
+  image_id                    = "${var.ami == "" ? data.aws_ami.aws_optimized_ecs.id : var.ami}"
   instance_type               = "${var.instance_type}"
   key_name                    = "${var.key_name}"
-  iam_instance_profile        = "${aws_iam_instance_profile.ecs_profile.name}"
-  security_groups             = ["${concat(list(aws_security_group.ecs.id), var.security_group_ids)}"]
-  associate_public_ip_address = "${var.associate_public_ip_address}"
-
-  ebs_block_device {
+  security_groups             = ["${concat(list(module.sg.id), var.security_group_ids)}"]
+  user_data                   = "${coalesce(var.user_data, data.template_file.user_data.rendered)}"
+  ebs_block_device  = [{
     device_name           = "/dev/xvdcz"
     volume_size           = "${var.docker_storage_size}"
     volume_type           = "gp2"
     delete_on_termination = true
-  }
-
-  user_data = "${coalesce(var.user_data, data.template_file.user_data.rendered)}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_autoscaling_group" "ecs" {
-  name_prefix          = "asg-${aws_launch_configuration.ecs.name}-"
-  vpc_zone_identifier  = ["${var.subnet_id}"]
-  launch_configuration = "${aws_launch_configuration.ecs.name}"
-  min_size             = "${var.min_servers}"
-  max_size             = "${var.max_servers}"
-  desired_capacity     = "${var.servers}"
-  termination_policies = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
-
-  tags = [{
-    key                 = "Name"
-    value               = "${var.name} ${var.tagName}"
-    propagate_at_launch = true
   }]
-
-  tags = ["${var.extra_tags}"]
-
-  lifecycle {
-    create_before_destroy = true
-  }
+  // Autoscaling group
+  vpc_zone_identifier   = ["${var.subnet_id}"]
+  # TODO: make setable: EC2 or ELB
+  health_check_type     = "EC2"
+  min_size              = "${var.min_servers}"
+  max_size              = "${var.max_servers}"
+  desired_capacity      = "${var.servers}"
+  termination_policies  = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
+  tags_ag               = ["${var.extra_tags}"]
 }
 
-resource "aws_security_group" "ecs" {
-  name        = "ecs-sg-${var.name}"
-  description = "Container Instance Allowed Ports"
-  vpc_id      = "${data.aws_vpc.vpc.id}"
-
-  ingress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = "${var.allowed_cidr_blocks}"
-  }
-
-  ingress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "udp"
-    cidr_blocks = "${var.allowed_cidr_blocks}"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags {
-    Name = "ecs-sg-${var.name}"
-  }
-}
-
-# Make this a var that an get passed in?
-resource "aws_ecs_cluster" "cluster" {
-  name = "${var.name}"
+module "sg" {
+  source      = "git::https://github.com/devops-workflow/terraform-aws-security-group.git"
+  enabled     = "${module.enabled.value}"
+  name        = "${module.label.name}"
+  description         = "Container Instance Allowed Ports"
+  egress_cidr_blocks  = ["0.0.0.0/0"]
+  egress_rules        = ["all-all"]
+  environment         = "${module.label.environment}"
+  ingress_cidr_blocks = "${var.allowed_cidr_blocks}"
+  ingress_rules       = ["all-tcp", "all-udp"]
+  vpc_id              = "${data.aws_vpc.vpc.id}"
 }

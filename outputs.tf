@@ -1,15 +1,18 @@
 output "cluster_id" {
-  value = "${aws_ecs_cluster.cluster.id}"
+  description = "ECS Cluster ID"
+  value       = "${element(concat(aws_ecs_cluster.this.*.id, list("")), 0)}"
 }
 
 output "cluster_name" {
-  value = "${aws_ecs_cluster.cluster.name}"
+  description = "ECS Cluster Name"
+  value       = "${element(concat(aws_ecs_cluster.this.*.name, list("")), 0)}"
 }
 
 output "autoscaling_group" {
-  value = {
-    id   = "${aws_autoscaling_group.ecs.id}"
-    name = "${aws_autoscaling_group.ecs.name}"
-    arn  = "${aws_autoscaling_group.ecs.arn}"
+  description = "Map of ASG info"
+  value       = {
+    id   = "${module.asg.autoscaling_group_id}"
+    name = "${module.asg.autoscaling_group_name}"
+    arn  = "${module.asg.autoscaling_group_arn}"
   }
 }
