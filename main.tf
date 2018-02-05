@@ -107,7 +107,8 @@ module "asg" {
 }
 
 module "sg" {
-  source      = "git::https://github.com/devops-workflow/terraform-aws-security-group.git"
+  source      = "devops-workflow/security-group/aws"
+  version     = "2.0.0"
   enabled     = "${module.enabled.value}"
   name        = "${module.label.name}"
   description         = "Container Instance Allowed Ports"
