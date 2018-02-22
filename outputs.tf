@@ -12,6 +12,7 @@ output "cluster_security_group_id" {
   description = "ECS Cluster Security Group ID"
   value       = "${module.sg.id}"
 }
+
 output "autoscaling_group" {
   description = "Map of ASG info"
 
