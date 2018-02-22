@@ -8,6 +8,10 @@ output "cluster_name" {
   value       = "${element(concat(aws_ecs_cluster.this.*.name, list("")), 0)}"
 }
 
+output "cluster_security_group_id" {
+  description = "ECS Cluster Security Group ID"
+  value       = "${module.sg.id}"
+}
 output "autoscaling_group" {
   description = "Map of ASG info"
 
