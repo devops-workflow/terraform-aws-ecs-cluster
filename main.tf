@@ -30,29 +30,25 @@ data "aws_ami" "aws_optimized_ecs" {
   #count       = "${var.lookup_latest_ami ? 1 : 0}"
   most_recent = true
   owners = ["amazon"]
-  /*filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }*/
   filter {
     name   = "name"
     values = ["amzn-ami-${var.ami_version}-amazon-ecs-optimized"]
   }
-  /*filter {
+  filter {
     name   = "architecture"
     values = ["x86_64"]
   }
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
-  }*/
+  }
 }
 
 data "template_file" "user_data" {
   # TODO: option to pass in
   # Cannot disable due to reference
   #count     = "${module.enabled.value}"
-  template  = "${file("${path.module}/templates/user_data.tpl")}"
+  template  = "${file("${path.module}/templates/user_data.sh")}"
   vars {
     additional_user_data_script = "${var.additional_user_data_script}"
     cluster_name                = "${aws_ecs_cluster.this.name}"
@@ -97,7 +93,7 @@ module "asg" {
   }]
   // Autoscaling group
   vpc_zone_identifier   = ["${var.subnet_id}"]
-  # TODO: make setable: EC2 or ELB
+  # TODO: make setable: EC2 or ELB ??
   health_check_type     = "EC2"
   min_size              = "${var.min_servers}"
   max_size              = "${var.max_servers}"
