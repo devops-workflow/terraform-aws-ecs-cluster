@@ -1,38 +1,43 @@
-
 // Variables specific to module label
 variable "attributes" {
   description = "Suffix name with additional attributes (policy, role, etc.)"
   type        = "list"
   default     = []
 }
+
 variable "delimiter" {
   description = "Delimiter to be used between `name`, `namespaces`, `attributes`, etc."
   default     = "-"
 }
+
 variable "environment" {
   description = "Environment (ex: `dev`, `qa`, `stage`, `prod`). (Second or top level namespace. Depending on namespacing options)"
 }
+
 variable "name" {
   description = "Base name for resources"
 }
+
 variable "namespace-env" {
   description = "Prefix name with the environment. If true, format is: <env>-<name>"
   default     = true
 }
+
 variable "namespace-org" {
   description = "Prefix name with the organization. If true, format is: <org>-<env namespaced name>. If both env and org namespaces are used, format will be <org>-<env>-<name>"
   default     = false
 }
+
 variable "organization" {
   description = "Organization name (Top level namespace)."
   default     = ""
 }
+
 variable "tags" {
   description = "A map of additional tags"
   type        = "map"
   default     = {}
 }
-
 
 // Variables specific to this module
 variable "enabled" {
@@ -129,7 +134,6 @@ variable "max_servers" {
   description = "Maximum number of ECS servers to run."
   default     = 10
 }
-
 
 variable "name_prefix" {
   default = ""

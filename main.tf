@@ -29,15 +29,19 @@ data "aws_ami" "aws_optimized_ecs" {
   #count     = "${module.enabled.value}"
   #count       = "${var.lookup_latest_ami ? 1 : 0}"
   most_recent = true
+
   owners = ["amazon"]
+
   filter {
     name   = "name"
     values = ["amzn-ami-${var.ami_version}-amazon-ecs-optimized"]
   }
+
   filter {
     name   = "architecture"
     values = ["x86_64"]
   }
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
@@ -48,7 +52,8 @@ data "template_file" "user_data" {
   # TODO: option to pass in
   # Cannot disable due to reference
   #count     = "${module.enabled.value}"
-  template  = "${file("${path.module}/templates/user_data.sh")}"
+  template = "${file("${path.module}/templates/user_data.sh")}"
+
   vars {
     additional_user_data_script = "${var.additional_user_data_script}"
     cluster_name                = "${aws_ecs_cluster.this.name}"
@@ -60,7 +65,7 @@ data "template_file" "user_data" {
 
 data "aws_vpc" "vpc" {
   #count = "${module.enabled.value}"
-  id    = "${var.vpc_id}"
+  id = "${var.vpc_id}"
 }
 
 ###
@@ -68,7 +73,7 @@ data "aws_vpc" "vpc" {
 ###
 resource "aws_ecs_cluster" "this" {
   #count = "${module.enabled.value}"
-  name  = "${module.label.id}"
+  name = "${module.label.id}"
 }
 
 module "asg" {
@@ -77,6 +82,7 @@ module "asg" {
   enabled     = "${module.enabled.value}"
   name        = "${module.label.name}"
   environment = "${module.label.environment}"
+
   // Launch configuration
   associate_public_ip_address = "${var.associate_public_ip_address}"
   ebs_optimized               = true
@@ -86,28 +92,31 @@ module "asg" {
   key_name                    = "${var.key_name}"
   security_groups             = ["${concat(list(module.sg.id), var.security_group_ids)}"]
   user_data                   = "${coalesce(var.user_data, data.template_file.user_data.rendered)}"
-  ebs_block_device  = [{
+
+  ebs_block_device = [{
     device_name           = "/dev/xvdcz"
     volume_size           = "${var.docker_storage_size}"
     volume_type           = "gp2"
     delete_on_termination = true
   }]
+
   // Autoscaling group
-  vpc_zone_identifier   = ["${var.subnet_id}"]
+  vpc_zone_identifier = ["${var.subnet_id}"]
+
   # TODO: make setable: EC2 or ELB ??
-  health_check_type     = "EC2"
-  min_size              = "${var.min_servers}"
-  max_size              = "${var.max_servers}"
-  desired_capacity      = "${var.servers}"
-  termination_policies  = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
-  tags_ag               = ["${var.extra_tags}"]
+  health_check_type    = "EC2"
+  min_size             = "${var.min_servers}"
+  max_size             = "${var.max_servers}"
+  desired_capacity     = "${var.servers}"
+  termination_policies = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
+  tags_ag              = ["${var.extra_tags}"]
 }
 
 module "sg" {
-  source      = "devops-workflow/security-group/aws"
-  version     = "2.0.0"
-  enabled     = "${module.enabled.value}"
-  name        = "${module.label.name}"
+  source              = "devops-workflow/security-group/aws"
+  version             = "2.0.0"
+  enabled             = "${module.enabled.value}"
+  name                = "${module.label.name}"
   description         = "Container Instance Allowed Ports"
   egress_cidr_blocks  = ["0.0.0.0/0"]
   egress_rules        = ["all-all"]

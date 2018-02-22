@@ -7,8 +7,9 @@ resource "aws_iam_instance_profile" "ecs_profile" {
   #count       = "${module.enabled.value}"
   # TODO: use label
   name_prefix = "${replace(format("%.102s", replace("tf-ECSProfile-${var.name}-", "_", "-")), "/\\s/", "-")}"
-  role        = "${aws_iam_role.ecs_role.name}"
-  path        = "${var.iam_path}"
+
+  role = "${aws_iam_role.ecs_role.name}"
+  path = "${var.iam_path}"
 }
 
 resource "aws_iam_role" "ecs_role" {
@@ -16,7 +17,8 @@ resource "aws_iam_role" "ecs_role" {
   #count       = "${module.enabled.value}"
   # TODO: use label
   name_prefix = "${replace(format("%.32s", replace("tf-ECSInRole-${var.name}-", "_", "-")), "/\\s/", "-")}"
-  path        = "${var.iam_path}"
+
+  path = "${var.iam_path}"
 
   assume_role_policy = <<EOF
 {
@@ -80,14 +82,14 @@ resource "aws_iam_policy" "custom_ecs_policy" {
   name_prefix = "${replace(format("%.102s", replace("tf-ECSInPol-${var.name}-", "_", "-")), "/\\s/", "-")}"
   description = "A terraform created policy for ECS"
   path        = "${var.iam_path}"
-  policy = "${var.custom_iam_policy}"
+  policy      = "${var.custom_iam_policy}"
 }
 
 resource "aws_iam_policy_attachment" "attach_ecs" {
-  count       = "${module.enabled.value}"
-  name        = "ecs-attachment"
-  roles       = ["${aws_iam_role.ecs_role.name}"]
-  policy_arn  = "${element(concat(aws_iam_policy.ecs_policy.*.arn, aws_iam_policy.custom_ecs_policy.*.arn), 0)}"
+  count      = "${module.enabled.value}"
+  name       = "ecs-attachment"
+  roles      = ["${aws_iam_role.ecs_role.name}"]
+  policy_arn = "${element(concat(aws_iam_policy.ecs_policy.*.arn, aws_iam_policy.custom_ecs_policy.*.arn), 0)}"
 }
 
 /*
@@ -127,3 +129,4 @@ resource "aws_iam_role_policy" "consul_ecs_task" {
   policy      = "${data.aws_iam_policy_document.consul_task_policy.json}"
 }
 */
+

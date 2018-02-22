@@ -10,7 +10,8 @@ output "cluster_name" {
 
 output "autoscaling_group" {
   description = "Map of ASG info"
-  value       = {
+
+  value = {
     id   = "${module.asg.autoscaling_group_id}"
     name = "${module.asg.autoscaling_group_name}"
     arn  = "${module.asg.autoscaling_group_arn}"
