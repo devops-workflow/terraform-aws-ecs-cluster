@@ -79,9 +79,15 @@ resource "aws_ecs_cluster" "this" {
 module "asg" {
   #source    = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git?ref=tags/v0.1.3"
   source      = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git"
-  enabled     = "${module.enabled.value}"
-  name        = "${module.label.name}"
-  environment = "${module.label.environment}"
+  enabled       = "${module.enabled.value}"
+  name          = "${module.label.name}"
+  attributes    = "${var.attributes}"
+  delimiter     = "${var.delimiter}"
+  environment   = "${var.environment}"
+  namespace-env = "${var.namespace-env}"
+  namespace-org = "${var.namespace-org}"
+  organization  = "${var.organization}"
+  tags          = "${var.tags}"
 
   // Launch configuration
   associate_public_ip_address = "${var.associate_public_ip_address}"
@@ -115,12 +121,18 @@ module "asg" {
 module "sg" {
   source              = "devops-workflow/security-group/aws"
   version             = "2.0.0"
-  enabled             = "${module.enabled.value}"
-  name                = "${module.label.name}"
+  enabled       = "${module.enabled.value}"
+  name          = "${module.label.name}"
+  attributes    = "${var.attributes}"
+  delimiter     = "${var.delimiter}"
+  environment   = "${var.environment}"
+  namespace-env = "${var.namespace-env}"
+  namespace-org = "${var.namespace-org}"
+  organization  = "${var.organization}"
+  tags          = "${var.tags}"
   description         = "Container Instance Allowed Ports"
   egress_cidr_blocks  = ["0.0.0.0/0"]
   egress_rules        = ["all-all"]
-  environment         = "${module.label.environment}"
   ingress_cidr_blocks = "${var.allowed_cidr_blocks}"
   ingress_rules       = ["all-tcp", "all-udp"]
   vpc_id              = "${data.aws_vpc.vpc.id}"
