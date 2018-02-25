@@ -4,6 +4,11 @@
 
 # Documentation references:
 
+# TODO:
+#   Vars to pass to asg
+#     termination policies
+#     placement
+
 module "enabled" {
   source  = "devops-workflow/boolean/local"
   version = "0.1.1"
@@ -74,11 +79,15 @@ data "aws_vpc" "vpc" {
 resource "aws_ecs_cluster" "this" {
   #count = "${module.enabled.value}"
   name = "${module.label.id}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 module "asg" {
   #source    = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git?ref=tags/v0.1.3"
-  source      = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git"
+  source        = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git"
   enabled       = "${module.enabled.value}"
   name          = "${module.label.name}"
   attributes    = "${var.attributes}"
@@ -121,15 +130,15 @@ module "asg" {
 module "sg" {
   source              = "devops-workflow/security-group/aws"
   version             = "2.0.0"
-  enabled       = "${module.enabled.value}"
-  name          = "${module.label.name}"
-  attributes    = "${var.attributes}"
-  delimiter     = "${var.delimiter}"
-  environment   = "${var.environment}"
-  namespace-env = "${var.namespace-env}"
-  namespace-org = "${var.namespace-org}"
-  organization  = "${var.organization}"
-  tags          = "${var.tags}"
+  enabled             = "${module.enabled.value}"
+  name                = "${module.label.name}"
+  attributes          = "${var.attributes}"
+  delimiter           = "${var.delimiter}"
+  environment         = "${var.environment}"
+  namespace-env       = "${var.namespace-env}"
+  namespace-org       = "${var.namespace-org}"
+  organization        = "${var.organization}"
+  tags                = "${var.tags}"
   description         = "Container Instance Allowed Ports"
   egress_cidr_blocks  = ["0.0.0.0/0"]
   egress_rules        = ["all-all"]
