@@ -117,7 +117,7 @@ module "asg" {
 
   // Autoscaling group
   placement_group      = "${var.placement_group}"
-  termination_policies = "${var.termination_policies}"
+  termination_policies = ["${var.termination_policies}"]
   vpc_zone_identifier  = ["${var.subnet_id}"]
 
   # TODO: make setable: EC2 or ELB ??
