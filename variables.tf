@@ -182,7 +182,7 @@ variable "vpc_id" {
 variable "termination_policies" {
   description = "A list of policies to decide how the instances in the auto scale group should be terminated. The allowed values are OldestInstance, NewestInstance, OldestLaunchConfiguration, ClosestToNextInstanceHour, Default"
   type        = "list"
-  default     = ["OldestLaunchConfiguration", "Default"]
+  default     = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
 }
 
 variable "placement_group" {

@@ -125,7 +125,6 @@ module "asg" {
   min_size             = "${var.min_servers}"
   max_size             = "${var.max_servers}"
   desired_capacity     = "${var.servers}"
-  termination_policies = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
   tags_ag              = ["${var.tags_ag}"]
 }
 
