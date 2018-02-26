@@ -121,11 +121,11 @@ module "asg" {
   vpc_zone_identifier  = ["${var.subnet_id}"]
 
   # TODO: make setable: EC2 or ELB ??
-  health_check_type    = "EC2"
-  min_size             = "${var.min_servers}"
-  max_size             = "${var.max_servers}"
-  desired_capacity     = "${var.servers}"
-  tags_ag              = ["${var.tags_ag}"]
+  health_check_type = "EC2"
+  min_size          = "${var.min_servers}"
+  max_size          = "${var.max_servers}"
+  desired_capacity  = "${var.servers}"
+  tags_ag           = ["${var.tags_ag}"]
 }
 
 module "sg" {
