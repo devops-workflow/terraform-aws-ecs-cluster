@@ -178,3 +178,19 @@ variable "user_data" {
 variable "vpc_id" {
   description = "The AWS VPC ID which you want to deploy your instances"
 }
+
+variable "termination_policies" {
+  description = "A list of policies to decide how the instances in the auto scale group should be terminated. The allowed values are OldestInstance, NewestInstance, OldestLaunchConfiguration, ClosestToNextInstanceHour, Default"
+  type        = "list"
+  default     = ["OldestLaunchConfiguration", "Default"]
+}
+
+variable "placement_group" {
+  description = "The name of the placement group into which you'll launch your instances, if any"
+  default     = ""
+}
+
+variable "tags_ag" {
+  description = "Additional tags for Autoscaling group. A list of tag blocks. Each element is a map with key, value, and propagate_at_launch."
+  default     = []
+}

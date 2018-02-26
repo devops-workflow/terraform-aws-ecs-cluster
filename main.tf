@@ -116,7 +116,9 @@ module "asg" {
   }]
 
   // Autoscaling group
-  vpc_zone_identifier = ["${var.subnet_id}"]
+  placement_group      = "${var.placement_group}"
+  termination_policies = "${var.termination_policies}"
+  vpc_zone_identifier  = ["${var.subnet_id}"]
 
   # TODO: make setable: EC2 or ELB ??
   health_check_type    = "EC2"
@@ -124,7 +126,7 @@ module "asg" {
   max_size             = "${var.max_servers}"
   desired_capacity     = "${var.servers}"
   termination_policies = ["OldestLaunchConfiguration", "ClosestToNextInstanceHour", "Default"]
-  tags_ag              = ["${var.extra_tags}"]
+  tags_ag              = ["${var.tags_ag}"]
 }
 
 module "sg" {
