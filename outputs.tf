@@ -13,6 +13,11 @@ output "cluster_security_group_id" {
   value       = "${module.sg.id}"
 }
 
+output "cluster_size" {
+  description = "Cluster size. Number of EC2 instances desired"
+  value       = "${var.servers}"
+}
+
 output "autoscaling_group" {
   description = "Map of ASG info"
 
