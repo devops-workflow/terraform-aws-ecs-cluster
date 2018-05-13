@@ -91,6 +91,11 @@ variable "dockerhub_token" {
   default     = ""
 }
 
+variable "ebs_optimized" {
+  description = "EBS Optimized"
+  default     = true
+}
+
 variable "enable_agents" {
   description = "Enable Consul Agent and Registrator tasks on each ECS Instance"
   default     = false
@@ -118,7 +123,7 @@ variable "custom_iam_policy" {
 
 variable "instance_type" {
   description = "AWS Instance type, if you change, make sure it is compatible with AMI, not all AMIs allow all instance types "
-  default     = "t2.micro"
+  default     = "m5.large"
 }
 
 variable "key_name" {

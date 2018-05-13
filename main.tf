@@ -100,7 +100,7 @@ module "asg" {
 
   // Launch configuration
   associate_public_ip_address = "${var.associate_public_ip_address}"
-  ebs_optimized               = true
+  ebs_optimized               = "${var.ebs_optimized}"
   iam_instance_profile        = "${aws_iam_instance_profile.ecs_profile.name}"
   image_id                    = "${var.ami == "" ? data.aws_ami.aws_optimized_ecs.id : var.ami}"
   instance_type               = "${var.instance_type}"
