@@ -125,7 +125,8 @@ module "asg" {
   min_size          = "${var.min_servers}"
   max_size          = "${var.max_servers}"
   desired_capacity  = "${var.servers}"
-  tags_ag           = ["${var.tags_ag}"]
+
+  #tags_ag           = ["${var.tags_ag}"]
 }
 
 module "sg" {
