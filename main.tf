@@ -131,7 +131,7 @@ module "asg" {
 
 module "sg" {
   source              = "devops-workflow/security-group/aws"
-  version             = "2.0.0"
+  version             = "2.2.0"
   enabled             = "${module.enabled.value}"
   name                = "${module.label.name}"
   attributes          = "${var.attributes}"
