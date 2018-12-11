@@ -35,6 +35,7 @@ the version of Terraform we currently use to test with.
 - `dockerhub_email` - Email Address used to authenticate to dockerhub. http://docs.aws.amazon.com/AmazonECS/latest/developerguide/private-auth.html
 - `dockerhub_token` - Auth Token used for dockerhub. http://docs.aws.amazon.com/AmazonECS/latest/developerguide/private-auth.html
 - `extra_tags` - Additional tags to be added to the ECS autoscaling group. Must be in the form of an array of hashes. See https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html for examples.
+
 ```
 extra_tags = [
     {
@@ -44,6 +45,7 @@ extra_tags = [
     },
   ]
 ```
+
 - `allowed_cidr_blocks` - List of subnets to allow into the ECS Security Group. Defaults to `["0.0.0.0/0"]`.
 - `ami` - A specific AMI image to use, eg `ami-95f8d2f3`. Defaults to the latest ECS optimized Amazon Linux AMI.
 - `ami_version` - Specific version of the Amazon ECS AMI to use (e.g. `2016.09`). Defaults to `*`. Ignored if `ami` is specified.
@@ -66,27 +68,26 @@ module "ecs-cluster" {
   subnet_id = ["subnet-6e101446"]
   vpc_id    = "vpc-99e73dfc"
 }
-
 ```
 
 ## Example cluster with consul and Registrator
 
 In order to start the Consul/Registrator task in ECS, you'll need to pass in a consul config into the `additional_user_data_script` script parameter.  For example, you might pass something like this:
 
-Please note, this module will try to mount `/etc/consul/` into `/consul/config` in the container and assumes that the consul config lives under `/etc/consul` on the docker host.  
+Please note, this module will try to mount `/etc/consul/` into `/consul/config` in the container and assumes that the consul config lives under `/etc/consul` on the docker host.
 
 ```Shell
 /bin/mkdir -p /etc/consul
 cat <<"CONSUL" > /etc/consul/config.json
 {
-	"raft_protocol": 3,
-	"log_level": "INFO",
-	"enable_script_checks": true,
+  "raft_protocol": 3,
+  "log_level": "INFO",
+  "enable_script_checks": true,
   "datacenter": "${datacenter}",
-	"retry_join_ec2": {
-		"tag_key": "consul_server",
-		"tag_value": "true"
-	}
+  "retry_join_ec2": {
+    "tag_key": "consul_server",
+    "tag_value": "true"
+  }
 }
 CONSUL
 ```
@@ -111,11 +112,11 @@ module "ecs-cluster" {
 }
 ```
 
-## Outputs
+## Outputs (remove once verified with descriptions)
 
 - `cluster_id` - _(String)_ ECS Cluster id for use in ECS task and service definitions.
 - `cluster_name` - (String) ECS Cluster name that can be used for CloudWatch app autoscaling policy resource_id.
-- `autoscaling_group` _(Map)_ A map with keys `id`, `name`, and `arn` of the `aws_autoscaling_group` created.  
+- `autoscaling_group` _(Map)_ A map with keys `id`, `name`, and `arn` of the `aws_autoscaling_group` created.
 
 ## Authors
 
