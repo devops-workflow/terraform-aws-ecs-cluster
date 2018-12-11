@@ -86,8 +86,8 @@ resource "aws_ecs_cluster" "this" {
 }
 
 module "asg" {
-  #source    = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git?ref=tags/v0.1.3"
-  source        = "git::https://github.com/devops-workflow/terraform-aws-autoscaling.git"
+  source        = "devops-workflow/autoscaling/aws"
+  version       = "3.2.1"
   enabled       = "${module.enabled.value}"
   name          = "${module.label.name}"
   attributes    = "${var.attributes}"
