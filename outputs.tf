@@ -27,3 +27,8 @@ output "autoscaling_group" {
     arn  = "${module.asg.autoscaling_group_arn}"
   }
 }
+
+output "iam_ecs_role" {
+  description = "IAM role name applied to ECS EC2 instances"
+  value       = "${aws_iam_role.ecs_role.name}"
+}

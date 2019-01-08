@@ -183,6 +183,7 @@ module "ecs-cluster" {
 | cluster\_name | ECS Cluster Name |
 | cluster\_security\_group\_id | ECS Cluster Security Group ID |
 | cluster\_size | Cluster size. Number of EC2 instances desired |
+| iam\_ecs\_role | IAM role name applied to ECS EC2 instances |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM GRAPH HOOK -->
